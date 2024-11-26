@@ -59,8 +59,8 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'naitik12gupta05@gmail.com'  # Your email address
-EMAIL_HOST_PASSWORD = 'kstf aroq huqy ydql'  # Your email password
-DEFAULT_FROM_EMAIL = 'your-email@example.com'
+EMAIL_HOST_PASSWORD = 'gnlu zqam qnoa oerj'  # Your email password
+# DEFAULT_FROM_EMAIL = 'your-email@example.com'
 
 
 ROOT_URLCONF = 'doctordoom.urls'

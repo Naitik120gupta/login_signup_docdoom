@@ -50,19 +50,20 @@ class LoginSerializer(serializers.Serializer):
         
         raise serializers.ValidationError("Invalid email or password.")
 
-# Password Reset Serializer
-class PasswordResetSerializer(serializers.Serializer):
+
+# Serializer for requesting a password reset
+class RequestPasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
     def validate_email(self, value):
-        try:
-            User.objects.get(email=value)
-            return value
-        except User.DoesNotExist:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        if not User.objects.filter(email=value).exists():
             raise serializers.ValidationError("User with this email does not exist.")
+        return value
 
 
-# Set New Password Serializer
+# Serializer for setting a new password
 class SetNewPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
     token = serializers.CharField()
