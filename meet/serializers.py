@@ -56,14 +56,14 @@ class PasswordResetSerializer(serializers.Serializer):
 
     def validate_email(self, value):
         try:
-            user = User.objects.get(email=value)
+            User.objects.get(email=value)
             return value
         except User.DoesNotExist:
             raise serializers.ValidationError("User with this email does not exist.")
 
-    def save(self):
-        # Implement password reset email logic here
-        email = self.validated_data['email']
-        user = User.objects.get(email=email)
-        # For example, send a password reset email with a token or link
-        print(f"Password reset email sent to {email}.")  # Placeholder
+
+# Set New Password Serializer
+class SetNewPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    token = serializers.CharField()
+    new_password = serializers.CharField(min_length=8, write_only=True)
