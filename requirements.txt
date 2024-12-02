@@ -23,6 +23,7 @@ gunicorn==23.0.0
 google.auth==2.36.0
 hyperlink==21.0.0
 idna==3.10
+django-allauth==4.12.2
 incremental==24.7.2
 Markdown==3.7
 ndg-httpsclient==0.5.1
