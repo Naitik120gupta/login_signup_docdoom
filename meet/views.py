@@ -6,10 +6,25 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from .models import User
+from .utils import generate_otp, send_otp_email
 
 
 User = get_user_model()
+
+class VerifyOTPView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        otp = request.data.get('otp')
+
+        user = User.objects.filter(email=email, otp=otp).first()
+
+        if user:
+            user.is_verified = True
+            user.otp = None  # Clear the OTP after successful verification
+            user.save()
+            return Response({'message': 'OTP verified successfully'}, status=status.HTTP_200_OK)
+        return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Password Reset Request View
@@ -55,16 +70,33 @@ class SetNewPasswordView(APIView):
 
 class RegisterView(APIView):
     def post(self, request):
-        serializer = RegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "User registered successfully."}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        if User.objects.filter(email=email).exists():
+            return Response({'error': 'User already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+        otp = generate_otp()
+        user = User.objects.create(email=email, otp=otp)
+        user.set_password(password)
+        user.save()
+
+        send_otp_email(email, otp)
+        return Response({'message': 'OTP sent to your email'}, status=status.HTTP_201_CREATED)
 
 class LoginView(APIView):
     def post(self, request):
-        serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid():
-            return Response(serializer.validated_data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        user = User.objects.filter(email=email).first()
+
+        if user and user.check_password(password):
+            otp = generate_otp()
+            user.otp = otp
+            user.save()
+            send_otp_email(email, otp)
+            return Response({'message': 'OTP sent to your email'}, status=status.HTTP_200_OK)
+        return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+
 

@@ -29,11 +29,16 @@ class User(AbstractUser):
     username = None  # Remove the default username field
     email = models.EmailField(unique=True)  # Use email as the unique identifier
     phone_number = models.CharField(max_length=15, unique=True, null=True, blank=True)
+    otp = models.CharField(max_length=6, blank=True, null=True)
+    is_verified = models.BooleanField(default=False)
 
+    objects = UserManager()
+
+    
     USERNAME_FIELD = 'email'  # Set email as the unique identifier for authentication
     REQUIRED_FIELDS = ['first_name', 'last_name']  # Required fields apart from email and password
 
-    objects = UserManager()
+    
 
     def __str__(self):
         return self.email
